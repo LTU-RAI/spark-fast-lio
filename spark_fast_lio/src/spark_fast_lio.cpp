@@ -86,33 +86,44 @@ SPARKFastLIO2::SPARKFastLIO2(const rclcpp::NodeOptions &options)
   auto g_vec = declare_parameter<std::vector<double>>("gravity_alignment.g_base", {0.0, 0.0, -1.0});
   g_base_ << g_vec[0], g_vec[1], g_vec[2];
 
+  // Topic names
+  auto topic_lidar       = declare_parameter<std::string>("topics.lidar", "lidar");
+  auto topic_imu         = declare_parameter<std::string>("topics.imu", "imu");
+  auto topic_cloud       = declare_parameter<std::string>("topics.cloud_registered", "cloud_registered");
+  auto topic_cloud_lidar = declare_parameter<std::string>("topics.cloud_registered_lidar", "cloud_registered_lidar");
+  auto topic_cloud_body  = declare_parameter<std::string>("topics.cloud_registered_body", "cloud_registered_body");
+  auto topic_cloud_base  = declare_parameter<std::string>("topics.cloud_registered_base", "cloud_registered_base");
+  auto topic_cloud_map   = declare_parameter<std::string>("topics.cloud_map", "cloud_map");
+  auto topic_odom        = declare_parameter<std::string>("topics.odometry", "odometry");
+  auto topic_path        = declare_parameter<std::string>("topics.path", "path");
+
   rclcpp::QoS lidar_qos(rclcpp::KeepLast(10));
   lidar_qos.reliable();
   lidar_qos.durability_volatile();
   sub_lidar_      = create_subscription<sensor_msgs::msg::PointCloud2>(
-      "lidar",
+      topic_lidar,
       lidar_qos,
       std::bind(&SPARKFastLIO2::standardLiDARCallback, this, std::placeholders::_1));
 
 #if defined(LIVOX_ROS_DRIVER_FOUND) && LIVOX_ROS_DRIVER_FOUND
   sub_lidar_livox_ = create_subscription<livox_ros_driver2::msg::CustomMsg>(
-      "lidar",
+      topic_lidar,
       lidar_qos,
       std::bind(&SPARKFastLIO2::livoxLidarCallback, this, std::placeholders::_1));
 #endif
   auto imu_qos = rclcpp::SensorDataQoS();
   sub_imu_ = create_subscription<sensor_msgs::msg::Imu>(
-      "imu", imu_qos, std::bind(&SPARKFastLIO2::imuCallback, this, std::placeholders::_1));
+      topic_imu, imu_qos, std::bind(&SPARKFastLIO2::imuCallback, this, std::placeholders::_1));
 
   rclcpp::QoS qos((rclcpp::SystemDefaultsQoS().keep_last(1).durability_volatile()));
-  pub_cloud_full_  = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_registered", qos);
-  pub_cloud_lidar_ = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_registered_lidar", qos);
-  pub_cloud_body_  = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_registered_body", qos);
-  pub_cloud_base_  = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_registered_base", qos);
+  pub_cloud_full_  = create_publisher<sensor_msgs::msg::PointCloud2>(topic_cloud, qos);
+  pub_cloud_lidar_ = create_publisher<sensor_msgs::msg::PointCloud2>(topic_cloud_lidar, qos);
+  pub_cloud_body_  = create_publisher<sensor_msgs::msg::PointCloud2>(topic_cloud_body, qos);
+  pub_cloud_base_  = create_publisher<sensor_msgs::msg::PointCloud2>(topic_cloud_base, qos);
 
-  pub_cloud_map_ = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_map", qos);
-  pub_odom_      = create_publisher<nav_msgs::msg::Odometry>("odometry", qos);
-  pub_path_      = create_publisher<nav_msgs::msg::Path>("path", qos);
+  pub_cloud_map_ = create_publisher<sensor_msgs::msg::PointCloud2>(topic_cloud_map, qos);
+  pub_odom_      = create_publisher<nav_msgs::msg::Odometry>(topic_odom, qos);
+  pub_path_      = create_publisher<nav_msgs::msg::Path>(topic_path, qos);
   path_msg_.header.frame_id = map_frame_;
 
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);

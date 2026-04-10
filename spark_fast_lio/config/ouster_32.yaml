@@ -1,5 +1,12 @@
 /**:
   ros__parameters:
+    common:
+      lidar_frame: "husky/os_sensor"
+      imu_frame: "vectornav"
+
+    gravity_alignment:
+      enable_gravity_alignment: true
+
     preprocess:
       lidar_type: 3               # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR,
       scan_line: 32
@@ -32,6 +39,19 @@
                     0.0, 0.0, 1.0]
 
     filter_size_map: 1.0 #0.5
+
+    topics:
+      # Subscribers
+      lidar: "/husky/ouster/points"
+      imu: "/husky/vectornav/imu"
+      # Publishers
+      cloud_registered: "fast_lio/cloud_registered"
+      cloud_registered_lidar: "fast_lio/cloud_registered_lidar"
+      cloud_registered_body: "fast_lio/cloud_registered_body"
+      cloud_registered_base: "fast_lio/cloud_registered_base"
+      cloud_map: "fast_lio/cloud_map"
+      odometry: "fast_lio/odometry"
+      path: "fast_lio/path"
 
     publish:
       path_en: true

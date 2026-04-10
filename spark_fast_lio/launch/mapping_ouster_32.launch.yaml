@@ -12,18 +12,7 @@ launch:
       output: screen
       on_exit: shutdown
 
-      remap:
-        - { from: 'lidar', to: '/husky/ouster/points' }
-        - { from: 'imu',   to: '/husky/vectornav/imu' }
-
       param:
-        - name: "common.lidar_frame"
-          value: "husky/os_sensor"
-        - name: "common.imu_frame"
-          value: "vectornav"
-        - name: "gravity_alignment.enable_gravity_alignment"
-          value: true
-
         - from: $(var config_path)
 
   - node:
