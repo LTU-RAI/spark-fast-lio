@@ -189,7 +189,7 @@ SPARKFastLIO2::SPARKFastLIO2(const rclcpp::NodeOptions &options)
     }
     std::filesystem::create_directories(pcd_save_path_);
     poses_file_.open(pcd_save_path_ + "/poses.txt");
-    poses_file_ << "# index tx ty tz qx qy qz qw" << std::endl;
+    poses_file_ << "# timestamp_ns tx ty tz qx qy qz qw" << std::endl;
     poses_file_ << std::fixed << std::setprecision(6);
     RCLCPP_INFO(this->get_logger(), "Saving scans and poses to: %s", pcd_save_path_.c_str());
   }
@@ -857,7 +857,8 @@ void SPARKFastLIO2::publishFrameWorld(
     if (cloud_to_be_saved_->size() > 0 && pcd_save_interval_ > 0 &&
         scan_wait_num >= pcd_save_interval_) {
       pcd_index_++;
-      std::string pcd_file = pcd_save_path_ + "/scans_" + std::to_string(pcd_index_) + ".pcd";
+      long long stamp_ns = static_cast<long long>(lidar_end_time_ * 1e9);
+      std::string pcd_file = pcd_save_path_ + "/" + std::to_string(stamp_ns) + ".pcd";
       pcl::PCDWriter pcd_writer;
       pcd_writer.writeBinary(pcd_file, *cloud_to_be_saved_);
       cloud_to_be_saved_->clear();
@@ -866,7 +867,7 @@ void SPARKFastLIO2::publishFrameWorld(
       // Save corresponding pose
       const auto &p = latest_state_.pos;
       auto q = latest_state_.rot.coeffs();  // x, y, z, w
-      poses_file_ << pcd_index_ << " "
+      poses_file_ << stamp_ns << " "
                   << p(0) << " " << p(1) << " " << p(2) << " "
                   << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << std::endl;
     }

@@ -63,9 +63,9 @@
       map_pub_interval: 20          # publish map every N scans (0 to disable)
 
     pcd_save:
-      pcd_save_en: false
-      save_path: ""                # directory to save scans and poses (empty = <package>/PCD)
-      interval: -1                 # how many LiDAR frames saved in each pcd file;
+      pcd_save_en: true
+      save_path: "/media/niksta/d70d3c70-5552-47eb-9d41-a97e911bd3c2/datasets/campus/Database/Ouster"                # directory to save scans and poses (empty = <package>/PCD)
+      interval: 1                 # how many LiDAR frames saved in each pcd file;
       # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
 
     verbose: true
