@@ -109,8 +109,9 @@ SPARKFastLIO2::SPARKFastLIO2(const rclcpp::NodeOptions &options)
   pub_cloud_body_  = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_registered_body", qos);
   pub_cloud_base_  = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_registered_base", qos);
 
-  pub_odom_                 = create_publisher<nav_msgs::msg::Odometry>("odometry", qos);
-  pub_path_                 = create_publisher<nav_msgs::msg::Path>("path", qos);
+  pub_cloud_map_ = create_publisher<sensor_msgs::msg::PointCloud2>("cloud_map", qos);
+  pub_odom_      = create_publisher<nav_msgs::msg::Odometry>("odometry", qos);
+  pub_path_      = create_publisher<nav_msgs::msg::Path>("path", qos);
   path_msg_.header.frame_id = map_frame_;
 
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
@@ -917,19 +918,6 @@ PoseStruct SPARKFastLIO2::transformPoseWrtBaseFrame(const state_ikfom &state) co
 
 bool SPARKFastLIO2::syncPackages(MeasureGroup &meas, bool verbose) {
   std::lock_guard<std::mutex> lk(buffer_mutex_);
-  if (verbose) {
-    static size_t num_lidar_prev = 0;
-    static size_t num_imu_prev   = 0;
-    size_t num_lidar_curr        = lidar_buffer_.size();
-    size_t num_imu_curr          = imu_buffer_.size();
-
-    // To only print out when changes occur
-    if ((num_lidar_prev != num_lidar_curr) || (num_imu_prev != num_imu_curr)) {
-      RCLCPP_INFO(this->get_logger(), "%lu vs. %lu", num_lidar_curr, num_imu_curr);
-      num_lidar_prev = num_lidar_curr;
-      num_imu_prev   = num_imu_curr;
-    }
-  }
 
   if (lidar_buffer_.empty() || imu_buffer_.empty()) return false;
 
@@ -1145,6 +1133,32 @@ void SPARKFastLIO2::processLidarAndImu(MeasureGroup &Measures) {
     if (scan_lidar_pub_en_) publishFrame(pub_cloud_lidar_, "lidar");
     if (scan_body_pub_en_) publishFrame(pub_cloud_body_, "imu");
     if (scan_base_pub_en_) publishFrame(pub_cloud_base_, "base");
+  }
+
+  /******* Publish map *******/
+  if (pub_cloud_map_->get_subscription_count() > 0) {
+    PointVector map_points;
+    ikd_tree_.flatten(ikd_tree_.Root_Node, map_points, NOT_RECORD);
+    PointCloudXYZI cloud_map;
+    cloud_map.points.assign(map_points.begin(), map_points.end());
+    cloud_map.width  = cloud_map.points.size();
+    cloud_map.height = 1;
+    sensor_msgs::msg::PointCloud2 msg;
+    pcl::toROSMsg(cloud_map, msg);
+    msg.header.stamp    = stamp;
+    msg.header.frame_id = map_frame_;
+    pub_cloud_map_->publish(msg);
+  }
+
+  /******* Live status *******/
+  {
+    const auto &p   = latest_state_.pos;
+    vect3 euler     = SO3ToEuler(latest_state_.rot);  // roll, pitch, yaw [deg]
+    double t_update = omp_get_wtime() - t_update_start;
+
+    printf("[LIO] xyz: %+7.2f %+7.2f %+7.2f | yaw: %+6.1f | map: %d pts | dt: %.1f ms\n",
+           p(0), p(1), p(2), euler[2], kdtree_size_st_, t_update * 1000.0);
+    fflush(stdout);
   }
 }
 }  // namespace spark_fast_lio

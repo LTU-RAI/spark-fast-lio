@@ -20,7 +20,7 @@ launch:
         - name: "common.lidar_frame"
           value: "husky/os_sensor"
         - name: "common.imu_frame"
-          value: "husky/os_imu"
+          value: "vectornav"
         - name: "gravity_alignment.enable_gravity_alignment"
           value: true
 
