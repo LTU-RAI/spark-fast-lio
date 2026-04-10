@@ -263,11 +263,15 @@ class SPARKFastLIO2 : public rclcpp::Node {
   int laserCloudValidNum_       = 0;
   int pcd_save_interval_        = -1;
   int pcd_index_                = 0;
+  int map_pub_interval_         = 10;
   int point_filter_num_         = 4;  // empirically, 4 showed the best performance
   int feats_down_size_neighbor_ = numeric_limits<int>::max();
 
-  double lidar_mean_scantime_ = 0.0;
-  int scan_num_               = 0;
+  double lidar_mean_scantime_  = 0.0;
+  int scan_num_                = 0;
+  double total_distance_m_     = 0.0;
+  V3D prev_pos_                = V3D::Zero();
+  bool has_prev_pos_           = false;
 
   double acc_diff_thr_              = 0.2;
   int num_moving_frames_thr_        = 10;

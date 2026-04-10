@@ -75,6 +75,7 @@ SPARKFastLIO2::SPARKFastLIO2(const rclcpp::NodeOptions &options)
   extrinsics_timeout_s_ = declare_parameter<double>("extrinsics_timeout_s", 10.0);
   pcd_save_en_          = declare_parameter<bool>("pcd_save.pcd_save_en", false);
   pcd_save_interval_    = declare_parameter<int>("pcd_save.interval", -1);
+  map_pub_interval_     = declare_parameter<int>("publish.map_pub_interval", 10);
 
   point_filter_num_ = declare_parameter<int>("point_filter_num", 4);
 
@@ -1136,7 +1137,11 @@ void SPARKFastLIO2::processLidarAndImu(MeasureGroup &Measures) {
   }
 
   /******* Publish map *******/
-  if (pub_cloud_map_->get_subscription_count() > 0) {
+  static int map_pub_counter = 0;
+  map_pub_counter++;
+  if (map_pub_interval_ > 0 && pub_cloud_map_->get_subscription_count() > 0 &&
+      map_pub_counter >= map_pub_interval_) {
+    map_pub_counter = 0;
     PointVector map_points;
     ikd_tree_.flatten(ikd_tree_.Root_Node, map_points, NOT_RECORD);
     PointCloudXYZI cloud_map;
@@ -1156,8 +1161,14 @@ void SPARKFastLIO2::processLidarAndImu(MeasureGroup &Measures) {
     vect3 euler     = SO3ToEuler(latest_state_.rot);  // roll, pitch, yaw [deg]
     double t_update = omp_get_wtime() - t_update_start;
 
-    printf("[LIO] xyz: %+7.2f %+7.2f %+7.2f | yaw: %+6.1f | map: %d pts | dt: %.1f ms\n",
-           p(0), p(1), p(2), euler[2], kdtree_size_st_, t_update * 1000.0);
+    if (has_prev_pos_) {
+      total_distance_m_ += (p - prev_pos_).norm();
+    }
+    prev_pos_     = p;
+    has_prev_pos_ = true;
+
+    printf("xyz: %+7.2f %+7.2f %+7.2f | yaw: %+6.1f | dist: %.3f km | map: %.2fM pts | dt: %.1f ms\n",
+           p(0), p(1), p(2), euler[2], total_distance_m_ / 1000.0, kdtree_size_st_ / 1e6, t_update * 1000.0);
     fflush(stdout);
   }
 }

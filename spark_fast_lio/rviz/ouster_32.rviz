@@ -24,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: scan
+    SyncSource: curr scan
 Visualization Manager:
   Class: ""
   Displays:
@@ -64,7 +64,7 @@ Visualization Manager:
       Max Intensity: 2848
       Min Color: 0; 0; 0
       Min Intensity: 1
-      Name: scan
+      Name: curr scan
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
@@ -82,8 +82,8 @@ Visualization Manager:
     - Alpha: 0.05000000074505806
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 13.17770767211914
-        Min Value: -3.7850022315979004
+        Max Value: 17.580900192260742
+        Min Value: -4.204196453094482
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -97,7 +97,7 @@ Visualization Manager:
       Max Intensity: 2439
       Min Color: 0; 0; 0
       Min Intensity: 1
-      Name: map
+      Name: sparse map
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 1
@@ -108,7 +108,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /cloud_registered
+        Value: /cloud_map
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
@@ -225,25 +225,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 225.62318420410156
+      Distance: 434.62213134765625
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 35.92949676513672
-        Y: -18.46796226501465
-        Z: -61.322628021240234
+        X: 27.347965240478516
+        Y: -12.811671257019043
+        Z: -54.328853607177734
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5647963285446167
+      Pitch: 1.1547963619232178
       Target Frame: husky/os_sensor
       Value: Orbit (rviz_default_plugins)
-      Yaw: 1.4285472631454468
+      Yaw: 0.3385448157787323
     Saved: ~
 Window Geometry:
   Displays:
