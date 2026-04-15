@@ -13,7 +13,7 @@
       scan_rate: 10               # only need to be set for velodyne, unit: Hz,
       timestamp_unit: 3           # the unit of time/t field in the PointCloud2 rostopic: 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
       blind: 1.0
-      blind_for_human_pilot: 2.0  # This parameter is to reject cloud points from human pilots
+      blind_for_human_pilot: 1.0  # This parameter is to reject cloud points from human pilots
 
     mapping:
       acc_cov: 0.1
@@ -22,7 +22,7 @@
       b_gyr_cov: 0.0001
       fov_degree: 360.0
       det_range: 100.0
-      extrinsic_est_en: false      # true: enable the online estimation of IMU-LiDAR extrinsic,
+      extrinsic_est_en: true      # true: enable the online estimation of IMU-LiDAR extrinsic,
 
       # NOTE(hlim): In `vbr_calib.yaml`, it says:
       #imu:
@@ -63,8 +63,8 @@
       map_pub_interval: 20          # publish map every N scans (0 to disable)
 
     pcd_save:
-      pcd_save_en: true
-      save_path: "~/Downloads/test/"                # directory to save scans and poses (empty = <package>/PCD)
+      pcd_save_en: false
+      save_path: "/home/walp/Downloads/test/"                # directory to save scans and poses (empty = <package>/PCD)
       interval: 1                 # how many LiDAR frames saved in each pcd file;
       # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
 
