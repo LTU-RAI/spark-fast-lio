@@ -12,8 +12,8 @@
       scan_line: 192
       scan_rate: 10               # only need to be set for velodyne, unit: Hz,
       timestamp_unit: 3           # the unit of time/t field in the PointCloud2 rostopic: 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
-      blind: 3.0
-      blind_for_human_pilot: 3.0  # This parameter is to reject cloud points from human pilots
+      blind: 1.0
+      blind_for_human_pilot: 1.0  # This parameter is to reject cloud points from human pilots
 
     mapping:
       acc_cov: 0.1
