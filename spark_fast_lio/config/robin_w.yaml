@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     common:
-      lidar_frame: "husky/os_sensor"
+      lidar_frame: "seyond"
       imu_frame: "vectornav"
 
     gravity_alignment:
