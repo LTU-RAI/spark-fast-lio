@@ -3,7 +3,7 @@
     common:
       lidar_frame: "spot/os_sensor"
       imu_frame: "spot/vectornav"
-      map_frame: "spot/map"
+      map_frame: "spot/odom"
       base_frame: "spot/base_link"
       # Frame in which odometry, TF child, and registered clouds are expressed.
       # Options:
@@ -19,7 +19,7 @@
       # these matrices and the values in mapping.extrinsic_T/R are ignored.
       publish_base_to_lidar_tf: true
       # base_T_lidar: [0.12, 0.0, 0.2]
-      base_T_lidar: [0.0, 0.0, 0.1]
+      base_T_lidar: [0.0, 0.0, 0.0]
       base_R_lidar: [1.0, 0.0, 0.0,
                      0.0, 1.0, 0.0,
                      0.0, 0.0, 1.0]
@@ -31,7 +31,7 @@
 
 
     gravity_alignment:
-      enable_gravity_alignment: false
+      enable_gravity_alignment: true
 
     preprocess:
       lidar_type: 3               # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR,
@@ -59,12 +59,12 @@
       #  - [0.0, 0.0, 0.0, 1.0]
       # However, this matrix is tranformation of IMU w.r.t. LiDAR frame.
       # What we need is transformation LiDAR w.r.t. (or to) IMU frame; thus, the inverse matrix should be given
-      extrinsic_T: [0.0, 0.0, 0.0]
+      extrinsic_T: [0.0, 0.0, 0.1]
       extrinsic_R: [1.0, 0.0, 0.0,
                     0.0, 1.0, 0.0,
                     0.0, 0.0, 1.0]
 
-    filter_size_map: 0.5 #0.3 #.5
+    filter_size_map: 0.25 #0.3 #.5
 
     topics:
       # Subscribers
