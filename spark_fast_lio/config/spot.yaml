@@ -3,7 +3,7 @@
     common:
       lidar_frame: "spot/os_sensor"
       imu_frame: "spot/vectornav"
-      map_frame: "spot/odom"
+      map_frame: "spot/map"
       base_frame: "spot/base_link"
       # Frame in which odometry, TF child, and registered clouds are expressed.
       # Options:
@@ -31,7 +31,7 @@
 
 
     gravity_alignment:
-      enable_gravity_alignment: true
+      enable_gravity_alignment: false
 
     preprocess:
       lidar_type: 3               # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR,
@@ -64,7 +64,7 @@
                     0.0, 1.0, 0.0,
                     0.0, 0.0, 1.0]
 
-    filter_size_map: 0.2 #0.3 #.5
+    filter_size_map: 0.5 #0.3 #.5
 
     topics:
       # Subscribers
@@ -83,21 +83,21 @@
     publish:
       path_en: true
       scan_publish_en: true        # false: close all the point cloud output
-      dense_publish_en: true       # false: low down the points number in a global-frame point clouds scan.
+      dense_publish_en: false       # false: low down the points number in a global-frame point clouds scan.
       scan_lidarframe_pub_en: false # true: output the point cloud scans in the LiDAR frame
       scan_bodyframe_pub_en: false  # true: output the point cloud scans in IMU-body frame
       scan_baseframe_pub_en: false  # true: output the point cloud scans in the base frame
       map_pub_interval: 10          # publish map every N scans (0 to disable)
 
     pcd_save:
-      pcd_save_en: true
+      pcd_save_en: false
       save_path: "/home/thor/maps/fast_lio/"                # directory to save scans and poses (empty = <package>/PCD)
       full_map_voxel_size: 0.2       # voxel size for the full accumulated map written on shutdown
       save_individual_scans: false    # if true: save per-interval scan pcds + poses_odom.txt (+ poses_map.txt when relocalized)
       interval: 1                     # how many LiDAR frames merged into each individual scan pcd
 
     relocalization:
-      map_file: "/home/thor/maps/km_sam/ltu_map/ltu_map_map.pcd"  # absolute path to prior map .pcd
+      map_file: ""  # absolute path to prior map .pcd
       map_frame: "spot/odom"                          # global map frame (matches campus_ouster.rviz Fixed Frame)
       odom_frame: "spot/odom"                        # must match common.map_frame
       base_frame: "spot/base_link"                   # must match common.base_frame
