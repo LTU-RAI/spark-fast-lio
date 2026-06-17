@@ -45,7 +45,7 @@ def rotation_matrix_to_quaternion(r):
 def launch_setup(context, *args, **kwargs):
     config_path = LaunchConfiguration('config_path').perform(context)
     rviz_path = LaunchConfiguration('rviz_path').perform(context)
-    use_sim_time = LaunchConfiguration('use_sim_time')
+    namespace = LaunchConfiguration('namespace')
 
     with open(config_path, 'r') as f:
         cfg = yaml.safe_load(f)
@@ -61,9 +61,10 @@ def launch_setup(context, *args, **kwargs):
         package='spark_fast_lio',
         executable='spark_lio_mapping',
         name='lio_mapping',
+        namespace=namespace,
         output='screen',
         on_exit=Shutdown(),
-        parameters=[config_path, {'use_sim_time': use_sim_time}],
+        parameters=[config_path],
     )
 
     static_tf_node = Node(
@@ -71,7 +72,6 @@ def launch_setup(context, *args, **kwargs):
         executable='static_transform_publisher',
         name='imu_to_lidar_static_tf',
         output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
         arguments=[
             '--x', str(extrinsic_t[0]),
             '--y', str(extrinsic_t[1]),
@@ -91,24 +91,25 @@ def launch_setup(context, *args, **kwargs):
         name='rviz',
         prefix='nice',
         output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
         arguments=['-d', rviz_path],
         condition=IfCondition(LaunchConfiguration('start_rviz')),
     )
 
-    return [lio_node, static_tf_node, rviz_node]
+    return [lio_node, 
+            #static_tf_node,
+            rviz_node]
 
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('spark_fast_lio')
-    default_config = os.path.join(pkg_share, 'config', 'ouster_32.yaml')
-    default_rviz = os.path.join(pkg_share, 'rviz', 'ouster_32.rviz')
+    default_config = os.path.join(pkg_share, 'config', 'ouster_unitree.yaml')
+    default_rviz = os.path.join(pkg_share, 'rviz', 'fast_lio_walp2.rviz')
 
     return LaunchDescription([
+        DeclareLaunchArgument('namespace', default_value='',
+                              description='Namespace for LIO topics (e.g. robot1)'),
         DeclareLaunchArgument('start_rviz', default_value='false',
                               description='automatically start rviz'),
-        DeclareLaunchArgument('use_sim_time', default_value='false',
-                              description='Set true when replaying a bag with --clock'),
         DeclareLaunchArgument('config_path', default_value=default_config,
                               description='Model-specific configuration'),
         DeclareLaunchArgument('rviz_path', default_value=default_rviz,

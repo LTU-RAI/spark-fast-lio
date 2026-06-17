@@ -171,7 +171,9 @@ SPARKFastLIO2::SPARKFastLIO2(const rclcpp::NodeOptions &options)
       lidar_qos,
       std::bind(&SPARKFastLIO2::livoxLidarCallback, this, std::placeholders::_1));
 #endif
-  auto imu_qos = rclcpp::SensorDataQoS();
+  auto imu_qos = rclcpp::SensorDataQoS();  // best_effort, matches typical IMU publishers
+  imu_qos.keep_last(2000);                 // deep queue so high-rate IMU bursts aren't dropped
+                                           // while the single-threaded LIO update is running
   sub_imu_ = create_subscription<sensor_msgs::msg::Imu>(
       topic_imu, imu_qos, std::bind(&SPARKFastLIO2::imuCallback, this, std::placeholders::_1));
 
@@ -1405,11 +1407,11 @@ void SPARKFastLIO2::processLidarAndImu(MeasureGroup &Measures) {
     prev_pos_     = p;
     has_prev_pos_ = true;
 
-    if (!wait_for_relocalization_.load() || relocalization_ready_.load()) {
-      printf("xyz: %+7.2f %+7.2f %+7.2f | yaw: %+6.1f | dist: %.3f km | map: %.2fM pts | dt: %.1f ms\n",
-             p(0), p(1), p(2), euler[2], total_distance_m_ / 1000.0, kdtree_size_st_ / 1e6, t_update * 1000.0);
-      fflush(stdout);
-    }
+    // Always print live status for every completed scan, regardless of
+    // relocalization state, so odometry feedback is visible alongside any warnings.
+    printf("xyz: %+7.2f %+7.2f %+7.2f | yaw: %+6.1f | dist: %.3f km | map: %.2fM pts | dt: %.1f ms\n",
+           p(0), p(1), p(2), euler[2], total_distance_m_ / 1000.0, kdtree_size_st_ / 1e6, t_update * 1000.0);
+    fflush(stdout);
   }
 }
 }  // namespace spark_fast_lio

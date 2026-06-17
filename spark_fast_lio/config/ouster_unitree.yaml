@@ -1,0 +1,126 @@
+/**:
+  ros__parameters:
+    common:
+      lidar_frame: "explorer/os_sensor"
+      imu_frame: "explorer/vectornav"
+      map_frame: "explorer/odom"
+      base_frame: "explorer/base_link"
+      # Frame in which odometry, TF child, and registered clouds are expressed.
+      # Options:
+      #   "imu"   -> publishes map_frame -> imu_frame   (EKF native; no extrinsic applied)
+      #   "lidar" -> publishes map_frame -> lidar_frame (IMU pose composed with IMU->LiDAR extrinsic)
+      #   "base"  -> publishes map_frame -> base_frame  (IMU pose composed with IMU->base extrinsic;
+      #                                                  requires base_frame set and base->lidar TF available)
+      visualization_frame: "base"
+
+      # Optional: let spark-fast-lio broadcast base_frame->lidar_frame and base_frame->imu_frame
+      # as static TFs itself (instead of relying on URDF / ouster driver / external publishers).
+      # When BOTH flags below are true, mapping.extrinsic_T/R (IMU->LiDAR) is auto-derived from
+      # these matrices and the values in mapping.extrinsic_T/R are ignored.
+      publish_base_to_lidar_tf: true
+      # base_T_lidar: [0.12, 0.0, 0.2]
+      base_T_lidar: [0.0, 0.0, 0.0]
+      base_R_lidar: [1.0, 0.0, 0.0,
+                     0.0, 1.0, 0.0,
+                     0.0, 0.0, 1.0]
+      publish_base_to_imu_tf: false
+      base_T_imu: [0.0, 0.0, 0.0]
+      base_R_imu: [1.0, 0.0, 0.0,
+                   0.0, 1.0, 0.0,
+                   0.0, 0.0, 1.0]
+
+
+    gravity_alignment:
+      enable_gravity_alignment: true
+
+    preprocess:
+      lidar_type: 3               # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR,
+      scan_line: 32
+      scan_rate: 10               # only need to be set for velodyne, unit: Hz,
+      timestamp_unit: 3           # the unit of time/t field in the PointCloud2 rostopic: 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
+      blind: 1.0
+      blind_for_human_pilot: 3.0  # This parameter is to reject cloud points from human pilots
+
+    mapping:
+      acc_cov: 0.1
+      gyr_cov: 0.1
+      b_acc_cov: 0.0001
+      b_gyr_cov: 0.0001
+      fov_degree: 360.0
+      det_range: 80.0
+      extrinsic_est_en: false      # true: enable the online estimation of IMU-LiDAR extrinsic,
+
+      # NOTE(hlim): In `vbr_calib.yaml`, it says:
+      #imu:
+      #  T_b:
+      #  - [0.9994652045891429, 0.03194161690749185, -0.00698788259543323, -0.045630250613467524]
+      #  - [-0.03200263570684775, 0.9994490166874298, -0.008798074077210848, -0.00784852988506693]
+      #  - [0.006703021917434096, 0.009017052443448963, 0.9999368527795895, -0.6084150115067585]
+      #  - [0.0, 0.0, 0.0, 1.0]
+      # However, this matrix is tranformation of IMU w.r.t. LiDAR frame.
+      # What we need is transformation LiDAR w.r.t. (or to) IMU frame; thus, the inverse matrix should be given
+      extrinsic_T: [0.0, 0.0, 0.0]
+      extrinsic_R: [1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+
+    filter_size_map: 0.5 #0.3 #.5
+
+    topics:
+      # Subscribers
+      lidar: "/explorer/ouster/points"
+      # imu: "/imu/data"
+      imu: "/explorer/vectornav/imu"
+      # Publishers
+      cloud_registered: "fast_lio/cloud_registered"
+      cloud_registered_lidar: "fast_lio/cloud_registered_lidar"
+      cloud_registered_body: "fast_lio/cloud_registered_body"
+      cloud_registered_base: "fast_lio/cloud_registered_base"
+      cloud_map: "fast_lio/cloud_map"
+      odometry: "odometry"
+      path: "fast_lio/path"
+
+    publish:
+      path_en: true
+      scan_publish_en: true        # false: close all the point cloud output
+      dense_publish_en: true       # false: low down the points number in a global-frame point clouds scan.
+      scan_lidarframe_pub_en: false # true: output the point cloud scans in the LiDAR frame
+      scan_bodyframe_pub_en: false  # true: output the point cloud scans in IMU-body frame
+      scan_baseframe_pub_en: false  # true: output the point cloud scans in the base frame
+      map_pub_interval: 10          # publish map every N scans (0 to disable)
+
+    pcd_save:
+      pcd_save_en: true
+      save_path: "/home/spot/Documents/fast_lio/"                # directory to save scans and poses (empty = <package>/PCD)
+      full_map_voxel_size: 0.2       # voxel size for the full accumulated map written on shutdown
+      save_individual_scans: false    # if true: save per-interval scan pcds + poses_odom.txt (+ poses_map.txt when relocalized)
+      interval: 1                     # how many LiDAR frames merged into each individual scan pcd
+
+    relocalization:
+      map_file: "/home/spot/Documents/km_sam/ltu_map/ltu_map_map.pcd"  # absolute path to prior map .pcd
+      map_frame: "map"                          # global map frame (matches campus_ouster.rviz Fixed Frame)
+      odom_frame: "explorer/odom"                        # must match common.map_frame
+      base_frame: "explorer/base_link"                   # must match common.base_frame
+      prior_map_voxel_size: 0.2
+      scan_voxel_size: 0.2
+      initialpose_topic: "/initialpose"
+      prior_map_topic: "fast_lio/prior_map"
+      localized_odom_topic: "fast_lio/relocalized_odometry"
+      status_topic: "fast_lio/relocalization_state"  # set to non-empty only during relocalization runs; empty disables the save gate
+      publish_localized_odom: true
+      correction_rate_hz: 0.5
+      tf_publish_rate_hz: 20.0
+      gicp:
+        max_correspondence_distance_init: 5.0
+        max_correspondence_distance_track: 1.0
+        max_iterations: 50
+        transformation_epsilon: 1.0e-4
+        fitness_threshold: 1.0  # accepted if lower than this value
+
+    verbose: true
+    pcl_verbose: false
+    runtime_pos_log_enable: true
+    point_filter_num_for_preprocessing: 1 # If it is set to `1`, full point cloud gonna be publlished
+    point_filter_num: 2                   # For pose estimation.
+    max_iteration: 4
+    cube_side_length: 1000.0
