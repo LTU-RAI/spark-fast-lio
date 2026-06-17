@@ -13,11 +13,13 @@ def launch_setup(context, *args, **kwargs):
     rviz_path = LaunchConfiguration('rviz_path').perform(context)
     map_file = LaunchConfiguration('map_file').perform(context)
     use_sim_time = LaunchConfiguration('use_sim_time')
+    namespace = LaunchConfiguration('namespace')
 
     lio_node = Node(
         package='spark_fast_lio',
         executable='spark_lio_mapping',
         name='lio_mapping',
+        namespace=namespace,
         output='screen',
         on_exit=Shutdown(),
         sigterm_timeout='600',
@@ -32,6 +34,7 @@ def launch_setup(context, *args, **kwargs):
     reloc_node = Node(
         package='spark_fast_lio',
         executable='spark_lio_relocalization',
+        namespace=namespace,
         name='spark_lio_relocalization',
         output='screen',
         on_exit=Shutdown(),
@@ -54,10 +57,12 @@ def launch_setup(context, *args, **kwargs):
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('spark_fast_lio')
-    default_config = os.path.join(pkg_share, 'config', 'ouster_unitree.yaml')
+    default_config = os.path.join(pkg_share, 'config', 'relocalization.yaml')
     default_rviz = os.path.join(pkg_share, 'rviz', 'campus_ouster.rviz')
 
     return LaunchDescription([
+                DeclareLaunchArgument('namespace', default_value='',
+                              description='Namespace for LIO topics (e.g. robot1)'),
         DeclareLaunchArgument('start_rviz', default_value='false',
                               description='automatically start rviz'),
         DeclareLaunchArgument('config_path', default_value=default_config,

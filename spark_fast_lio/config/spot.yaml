@@ -1,10 +1,10 @@
 /**:
   ros__parameters:
     common:
-      lidar_frame: "explorer/os_sensor"
-      imu_frame: "explorer/vectornav"
-      map_frame: "explorer/odom"
-      base_frame: "explorer/base_link"
+      lidar_frame: "spot/os_sensor"
+      imu_frame: "spot/vectornav"
+      map_frame: "spot/odom"
+      base_frame: "spot/base_link"
       # Frame in which odometry, TF child, and registered clouds are expressed.
       # Options:
       #   "imu"   -> publishes map_frame -> imu_frame   (EKF native; no extrinsic applied)
@@ -19,7 +19,7 @@
       # these matrices and the values in mapping.extrinsic_T/R are ignored.
       publish_base_to_lidar_tf: true
       # base_T_lidar: [0.12, 0.0, 0.2]
-      base_T_lidar: [0.0, 0.0, 0.0]
+      base_T_lidar: [0.0, 0.0, 0.1]
       base_R_lidar: [1.0, 0.0, 0.0,
                      0.0, 1.0, 0.0,
                      0.0, 0.0, 1.0]
@@ -64,20 +64,20 @@
                     0.0, 1.0, 0.0,
                     0.0, 0.0, 1.0]
 
-    filter_size_map: 0.5 #0.3 #.5
+    filter_size_map: 0.2 #0.3 #.5
 
     topics:
       # Subscribers
-      lidar: "/explorer/ouster/points"
+      lidar: "/spot/ouster/points"
       # imu: "/imu/data"
-      imu: "/explorer/vectornav/imu"
+      imu: "/spot/vectornav/imu"
       # Publishers
       cloud_registered: "fast_lio/cloud_registered"
       cloud_registered_lidar: "fast_lio/cloud_registered_lidar"
       cloud_registered_body: "fast_lio/cloud_registered_body"
       cloud_registered_base: "fast_lio/cloud_registered_base"
       cloud_map: "fast_lio/cloud_map"
-      odometry: "odometry"
+      odometry: "odometry/imu"
       path: "fast_lio/path"
 
     publish:
@@ -91,16 +91,16 @@
 
     pcd_save:
       pcd_save_en: true
-      save_path: "/home/spot/Documents/fast_lio/"                # directory to save scans and poses (empty = <package>/PCD)
+      save_path: "/home/thor/maps/fast_lio/"                # directory to save scans and poses (empty = <package>/PCD)
       full_map_voxel_size: 0.2       # voxel size for the full accumulated map written on shutdown
       save_individual_scans: false    # if true: save per-interval scan pcds + poses_odom.txt (+ poses_map.txt when relocalized)
       interval: 1                     # how many LiDAR frames merged into each individual scan pcd
 
     relocalization:
-      map_file: "/home/spot/Documents/km_sam/ltu_map/ltu_map_map.pcd"  # absolute path to prior map .pcd
-      map_frame: "map"                          # global map frame (matches campus_ouster.rviz Fixed Frame)
-      odom_frame: "explorer/odom"                        # must match common.map_frame
-      base_frame: "explorer/base_link"                   # must match common.base_frame
+      map_file: "/home/thor/maps/km_sam/ltu_map/ltu_map_map.pcd"  # absolute path to prior map .pcd
+      map_frame: "spot/odom"                          # global map frame (matches campus_ouster.rviz Fixed Frame)
+      odom_frame: "spot/odom"                        # must match common.map_frame
+      base_frame: "spot/base_link"                   # must match common.base_frame
       prior_map_voxel_size: 0.2
       scan_voxel_size: 0.2
       initialpose_topic: "/initialpose"
